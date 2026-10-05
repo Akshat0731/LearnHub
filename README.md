@@ -1,106 +1,159 @@
 # LearnHub - Online Learning Platform
 
-LearnHub is a full-stack online learning platform where students browse courses, enroll, track their progress and leave course feedback. Admins get a dashboard to manage courses, users and contact messages, with a live enrollment chart and YouTube-based course content.
+**LearnHub** is a full-stack online learning platform where students can browse courses, enroll, track their progress, and leave course feedback. Admins get a dashboard to manage courses, users, and contact messages, with a live enrollment chart and YouTube-based course content.
+
+It is built to provide practical experience in developing a complete web application with **frontend, backend, database, authentication, authorization, validation, and centralized error handling**.
 
 ## Features
 
-- Browse all courses and open a course page with an embedded YouTube video or playlist
-- Enroll in courses (duplicate enrollments are blocked by a unique `{user, course}` index)
-- Student dashboard with enrolled courses and progress
-- Course feedback with 1-5 star ratings
-- Contact form (messages are stored for the admin)
-- Admin dashboard with total users / courses / enrollments and a weekly enrollment chart (Chart.js, real data)
-- Admin: add, edit, delete courses; view and delete users; read contact messages
-- Deleting a course or a user also deletes their enrollments and feedback
-- Session-based authentication with bcrypt password hashing
-- Sessions stored in MongoDB (connect-mongo), session id regenerated on login (prevents session fixation)
-- Role-based access control (student / admin) on both the REST API and the pages
-- Request inputs validated with Joi and sanitized against NoSQL injection
-- One central error handler (ExpressError + wrapAsync), JSON for the API, an error page for browsers
-- Modular routing using Express Router, separate controllers
+* Browse all courses and view a course page with an embedded YouTube video or playlist
+* Enroll in courses with duplicate enrollments blocked using a unique `{user, course}` index
+* Student dashboard with enrolled courses and progress
+* Course feedback with **1-5 star ratings**
+* Contact form with messages stored for the admin
+* Admin dashboard showing total users, courses, and enrollments
+* Weekly enrollment chart using **Chart.js** with real data
+* Admin: add, edit, and delete courses
+* Admin: view and delete users
+* Admin: read contact messages
+* Deleting a course or user also deletes their enrollments and feedback
+* User signup, login, and logout
+* Session-based authentication with **bcrypt password hashing**
+* Sessions stored in MongoDB using **connect-mongo**
+* Session ID regenerated on login to prevent session fixation
+* Role-based access control (**student / admin**) on both pages and REST API
+* Server-side validation using **Joi**
+* Input sanitization against NoSQL injection
+* XSS protection by escaping user-generated content
+* Custom error handling using **ExpressError** and **wrapAsync**
+* Centralized error handler with JSON responses for API requests and error pages for browsers
+* Custom 404 handling
+* Modular routing using **Express Router**
+* MVC-style structure with separate controllers
 
 ## Technologies Used
 
-Node.js, Express.js, MongoDB, Mongoose, express-session, connect-mongo, bcryptjs, Multer, dotenv, Joi, HTML, CSS, JavaScript, Chart.js
+### Frontend
 
-## Run it
+* HTML
+* CSS
+* JavaScript
+* Chart.js
 
-You need Node 18+ and MongoDB (local, or a free MongoDB Atlas cluster).
+### Backend
 
-```bash
-npm install
-npm run init-db     # fills the database with sample data (WARNING: deletes existing data)
-npm start           # http://localhost:3000
-npm run dev         # same, but restarts on every file change (nodemon app.js)
+* Node.js
+* Express.js
+* Express Router
+
+### Database
+
+* MongoDB
+* Mongoose
+
+### Authentication and Authorization
+
+* express-session
+* connect-mongo
+* bcryptjs
+* Role-based middleware (`isLoggedIn`, `isAdmin`)
+
+### Validation and Error Handling
+
+* Joi
+* ExpressError
+* wrapAsync
+* Centralized error handler
+
+### Other Tools
+
+* Multer
+* dotenv
+* Nodemon
+* Git
+* GitHub
+
+## CRUD Operations
+
+### Create
+
+* Add courses by admins
+* Create enrollments
+* Add course feedback
+* Submit contact messages
+
+### Read
+
+* View courses
+* View course details
+* View student dashboard
+* View feedback
+* View users
+* View contact messages
+* View admin statistics
+
+### Update
+
+* Edit existing courses by admins
+
+### Delete
+
+* Delete courses
+* Delete users by admins
+* Delete related enrollments and feedback
+
+## Architecture
+
+LearnHub follows an **MVC-style architecture** to keep the application organized and maintainable.
+
+### Model
+
+Mongoose schemas for:
+
+* User
+* Course
+* Enrollment
+* Feedback
+* Contact
+
+### View
+
+HTML pages served only through guarded routes.
+
+### Controller
+
+Application logic for:
+
+* Authentication
+* Courses
+* Enrollments
+* Feedback
+* Contact
+* Admin
+
+Routes are modular, with a separate router for each feature.
+
+## Authentication and Authorization
+
+LearnHub uses **session-based authentication**.
+
+### Users can
+
+* Create an account
+* Log in and log out
+* Browse courses
+* Enroll in courses
+* Give feedback on courses
+* View their own dashboard
+
+### Admins can
+
+* Manage courses
+* Manage users
+* View contact messages
+* View dashboard statistics
+
+Admin pages are served through **guarded routes**, so they cannot be opened by regular users or visitors.
+
+throw new
 ```
-
-The `.env` file is already set for a local MongoDB (`mongodb://127.0.0.1:27017/learnhub`). For Atlas, put your connection string in `MONGO_URI`. See `.env.example`.
-
-`npm run init-db` creates these accounts:
-
-| Role | Email | Password |
-|---|---|---|
-| admin | admin@learnhub.com | admin12345 |
-| student | aarav@learnhub.com | student123 |
-| student | diya@learnhub.com | student123 |
-| student | rohan@learnhub.com | student123 |
-| student | isha@learnhub.com | student123 |
-
-Plus 6 courses, 9 enrollments (spread over the last 30 days so the chart has data), 4 feedback entries and 2 contact messages. Change these passwords before deploying.
-
-## Project structure
-
-```
-app.js                 app setup: sessions, routes, 404, central error handler
-middleware.js          isLoggedIn, isAdmin, validators, sanitizer, notFound, errorHandler
-schema.js              Joi schemas
-config/db.js           MongoDB connection
-models/                user, course, enrollment, feedback, contact
-controllers/           auth, courses, enrollments, feedback, contact, admin
-routes/                auth, course, enrollment, feedback, contact, admin, pages
-utils/                 ExpressError, wrapAsync
-init/                  data.js + index.js (sample data for testing)
-views/                 HTML pages (served only through routes/pages.js, so they can be guarded)
-public/                static files: images, js (navbar, utils), partials (navbar, footer)
-```
-
-## Page routes
-
-| Route | Access |
-|---|---|
-| `/` , `/courses`, `/courses/:id`, `/contact`, `/login`, `/register` | public |
-| `/courses/:id/feedback`, `/student/dashboard` | logged in |
-| `/admin/dashboard`, `/admin/courses`, `/admin/courses/new`, `/admin/courses/:id/edit`, `/admin/users`, `/admin/contacts` | admin |
-
-## REST API
-
-| Method | Route | Access |
-|---|---|---|
-| POST | `/api/auth/register`, `/api/auth/login`, `/api/auth/logout` | - |
-| GET | `/api/auth/session` | - |
-| GET | `/api/courses`, `/api/courses/:id` | - |
-| POST | `/api/contact` | - |
-| GET | `/api/feedback?course_id=` | - |
-| POST | `/api/feedback` | logged in |
-| POST | `/api/enrollments` | logged in |
-| GET | `/api/enrollments/me` | logged in |
-| GET | `/api/admin/stats` | admin |
-| GET, POST | `/api/admin/courses` | admin |
-| PUT, DELETE | `/api/admin/courses/:id` | admin |
-| GET | `/api/admin/users` | admin |
-| DELETE | `/api/admin/users/:id` | admin |
-| GET | `/api/admin/contacts` | admin |
-
-## Error handling
-
-Controllers just throw (`throw new ExpressError(404, "Course not found")`). `wrapAsync` passes every error to `next`, and the single `errorHandler` in `middleware.js` turns it into a response. It also understands Mongoose validation errors, bad ids, duplicate keys (duplicate email -> 409, duplicate enrollment -> 409), Multer errors and broken JSON. API requests get `{ "status": "error", "message": "..." }`, browser requests get the error page. Unexpected 500 errors are logged and only a generic message is sent to the client.
-
-## Bugs fixed in this version
-
-- **Edit Course never opened**: the page ran `isNaN(courseId)` on a MongoDB id (always true), so it always showed "Invalid course id" and left.
-- **Admin dashboard used fake data**: totals came from `localStorage` and the chart used random numbers. It now reads real data from `/api/admin/stats`.
-- **Admin logout did not log out**: it only cleared `sessionStorage`. It now calls `/api/auth/logout`.
-- **Admin pages were public static files**: anyone could open them (only the API was protected). They are now served through guarded routes.
-- **Stored XSS**: names, course text, contact messages and feedback are escaped before being rendered.
-- **Sessions on hosting platforms**: `trust proxy` is enabled in production, otherwise the secure cookie is never set behind a proxy and nobody can stay logged in.
-- Clearer startup errors (missing `.env`, MongoDB not running) instead of a crash.
