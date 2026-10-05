@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login | LearnHub</title>
+  <style>
+    body {
+      font-family: "Poppins", sans-serif;
+      background: #fff9f5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+    .form-container {
+      background: #fff;
+      padding: 40px 30px;
+      border-radius: 12px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 400px;
+    }
+    h2 {
+      text-align: center;
+      color: #ff6f61;
+      margin-bottom: 25px;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+    .form-group input {
+      width: 94%;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      outline: none;
+      transition: 0.3s;
+    }
+    .form-group input:focus {
+      border-color: #ff6f61;
+    }
+    .form-group small {
+      color: red;
+      display: none;
+    }
+    .btn {
+      width: 100%;
+      padding: 12px;
+      background: #ff6f61;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: 0.3s;
+    }
+    .btn:hover {
+      background: #ff4c3b;
+    }
+    .toggle-link {
+      text-align: center;
+      margin-top: 15px;
+      font-size: 14px;
+    }
+    .toggle-link a {
+      color: #ff6f61;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+  <div class="form-container">
+    <h2>Login</h2>
+    <form id="loginForm">
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" placeholder="Enter your email" required>
+        <small>Valid email required</small>
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="Enter password" required>
+        <small>Password must be at least 6 characters</small>
+      </div>
+      <button type="submit" class="btn">Login</button>
+      <div class="toggle-link">
+        Don't have an account? <a href="/register">Register</a>
+      </div>
+    </form>
+  </div>
+
+  <script>
+  const loginForm = document.getElementById('loginForm');
+
+  loginForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const email = document.getElementById('email');
+      const password = document.getElementById('password');
+      let valid = true;
+
+      // Basic validation
+      if(!email.value.includes('@')) {
+          email.nextElementSibling.style.display = 'block';
+          valid = false;
+      } else {
+          email.nextElementSibling.style.display = 'none';
+      }
+
+      if(password.value.length < 6) {
+          password.nextElementSibling.style.display = 'block';
+          valid = false;
+      } else {
+          password.nextElementSibling.style.display = 'none';
+      }
+
+      if(!valid) return;
+
+      // Send login request
+      const formData = new FormData();
+      formData.append('email', email.value);
+      formData.append('password', password.value);
+
+      fetch('/api/auth/login', {
+          method: 'POST',
+          body: formData
+      })
+      .then(res => res.json())
+      .then(data => {
+          if(data.status === 'success'){
+              // Redirect based on role
+              if(data.role === 'admin'){
+                  window.location.href = '/admin/dashboard';
+              } else {
+                  window.location.href = '/student/dashboard';
+              }
+          } else {
+              alert(data.message);
+          }
+      })
+      .catch(err => console.error('Error:', err));
+  });
+  </script>
+</body>
+</html>

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard | LearnHub</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js" />
+  <style>
+    body {
+      font-family: "Poppins", sans-serif;
+      margin: 0;
+      background: #fff9f5;
+      color: #333;
+    }
+
+    /* ===== NAVBAR ===== */
+    .navbar {
+      background: linear-gradient(90deg, #ff8c00, #ff6600);
+      padding: 15px 10%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: white;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .navbar h2 { margin: 0; }
+    .navbar button {
+      padding: 8px 18px;
+      background: #fff;
+      color: #ff6600;
+      font-weight: 600;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .navbar button:hover {
+      background: #ff751a;
+      color: #fff;
+      border:1px solid #fff;
+    }
+
+    /* Dashboard container */
+    .dashboard {
+      display: grid;
+      grid-template-columns: 1fr 3fr;
+      gap: 30px;
+      padding: 40px 10%;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      background: rgba(255,255,255,0.9);
+      border-radius: 16px;
+      backdrop-filter: blur(8px);
+      padding: 25px;
+      box-shadow: 0 8px 20px rgba(255, 102, 0, 0.15);
+    }
+    .sidebar h3 {
+      color: #ff6600;
+      margin-bottom: 20px;
+    }
+    .sidebar button {
+      width: 100%;
+      margin-bottom: 15px;
+      padding: 12px;
+      background: linear-gradient(90deg, #ff8c00, #ff6600);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+    .sidebar button:hover {
+      background: #ff751a;
+      transform: translateY(-2px);
+    }
+
+    /* Main content */
+    .main-content {
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 25px;
+    }
+
+    .card {
+      background: rgba(255,255,255,0.9);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 8px 20px rgba(255,102,0,0.15);
+      text-align: center;
+      transition: all 0.3s;
+    }
+    .card h4 {
+      color: #ff6600;
+      margin-bottom: 12px;
+    }
+    .card p {
+      font-size: 1rem;
+      margin-bottom: 10px;
+      color: #555;
+    }
+    .card button {
+      background: linear-gradient(90deg, #ff8c00, #ff6600);
+      color: white;
+      padding: 8px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .card button:hover {
+      background: #ff751a;
+      transform: translateY(-2px);
+    }
+
+    /* Charts section */
+    .chart-container {
+      background: rgba(255,255,255,0.9);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 8px 20px rgba(255,102,0,0.15);
+    }
+
+    @media(max-width: 900px){
+      .dashboard {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <div class="navbar">
+    <h2>LearnHub Admin Dashboard</h2>
+    <button onclick="logout()">Logout</button>
+  </div>
+
+  <div class="dashboard">
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <h3>Admin Controls</h3>
+      <button onclick="window.location.href='/admin/courses/new'">Add New Course</button>
+      <button onclick="window.location.href='/admin/users'">View All Users</button>
+      <button onclick="window.location.href='/admin/courses'">View All Courses</button>
+      <button onclick="window.location.href='/admin/contacts'">Contacts</button>
+    </div>
+
+    <!-- Main content -->
+    <div class="main-content">
+
+      <!-- Stats cards -->
+      <div class="card-grid">
+        <div class="card">
+          <h4>Total Users</h4>
+          <p id="totalUsers">0</p>
+          <button onclick="window.location.href='/admin/users'">View Users</button>
+        </div>
+        <div class="card">
+          <h4>Total Courses</h4>
+          <p id="totalCourses">0</p>
+          <button onclick="window.location.href='/admin/courses'">View Courses</button>
+        </div>
+        <div class="card">
+          <h4>Active Enrollments</h4>
+          <p id="activeEnrollments">0</p>
+          <button onclick="window.location.href='/admin/courses'">View Enrollments</button>
+        </div>
+      </div>
+
+      <!-- Chart: Enrollments Over Time -->
+      <div class="chart-container">
+        <h4>Weekly Enrollment Trends</h4>
+        <canvas id="enrollChart" height="150"></canvas>
+      </div>
+
+    </div>
+
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    // Real numbers from the database (admin only API)
+    async function loadDashboard() {
+      try {
+        const res = await fetch('/api/admin/stats');
+        const stats = await res.json();
+        if (stats.status !== 'success') {
+          alert(stats.message || 'Could not load dashboard data');
+          return;
+        }
+
+        document.getElementById('totalUsers').textContent = stats.totalUsers;
+        document.getElementById('totalCourses').textContent = stats.totalCourses;
+        document.getElementById('activeEnrollments').textContent = stats.activeEnrollments;
+
+        // Chart: Weekly enrollments (last 5 weeks)
+        const ctx = document.getElementById('enrollChart').getContext('2d');
+        const labels = stats.weekly.map(w =>
+          new Date(w.weekStart).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })
+        );
+        const data = {
+          labels: labels,
+          datasets: [{
+            label: 'Enrollments',
+            data: stats.weekly.map(w => w.count),
+            fill: true,
+            backgroundColor: 'rgba(255, 140, 0, 0.2)',
+            borderColor: 'rgba(255, 102, 0, 0.8)',
+            tension: 0.4
+          }]
+        };
+        new Chart(ctx, {
+          type: 'line',
+          data: data,
+          options: {
+            responsive: true,
+            plugins: { legend: { position: 'top' } },
+            scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+          }
+        });
+      } catch (err) {
+        console.error('Dashboard load error:', err);
+        alert('Could not load dashboard data. Try again.');
+      }
+    }
+
+    // Logout function (ends the session on the server too)
+    async function logout() {
+      try {
+        await fetch('/api/auth/logout', { method: 'POST' });
+      } finally {
+        window.location.href = '/login';
+      }
+    }
+
+    loadDashboard();
+  </script>
+</body>
+</html>

@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edit Course | LearnHub</title>
+  <style>
+    body {
+      font-family: "Poppins", sans-serif;
+      background: linear-gradient(120deg, #fff5ee, #fff);
+      margin: 0;
+      color: #333;
+    }
+
+    .navbar {
+      background: linear-gradient(90deg, #ff8c00, #ff6600);
+      color: white;
+      padding: 15px 10%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .navbar h2 { margin: 0; color: #fff; }
+    .navbar button {
+      background: white;
+      color: #ff6600;
+      padding: 8px 18px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .navbar button:hover { background: #ffe0b3; }
+
+    .container {
+      max-width: 600px;
+      margin: 70px auto;
+      padding: 25px 30px;
+      background: rgba(255,255,255,0.9);
+      border-radius: 16px;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 8px 20px rgba(255, 102, 0, 0.15);
+    }
+
+    h2 {
+      text-align: center;
+      color: #ff6600;
+      margin-bottom: 30px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 500;
+      text-align: left;
+    }
+
+    input, textarea, select {
+      width: 96%;
+      padding: 12px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-family: "Poppins", sans-serif;
+    }
+
+    textarea { height: 120px; resize: none; }
+
+    button.submit-btn {
+      background: linear-gradient(90deg, #ff8c00, #ff6600);
+      color: white;
+      padding: 12px 25px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    button.submit-btn:hover {
+      background: #ff751a;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(255, 102, 0, 0.35);
+    }
+
+    .success {
+      color: green;
+      text-align: center;
+      margin-top: 15px;
+      font-weight: 500;
+    }
+
+    .hint {
+      font-size: 0.85rem;
+      color: #777;
+      margin-top: -15px;
+      margin-bottom: 15px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="navbar">
+    <h2>Edit Course</h2>
+    <button onclick="window.location.href='/admin/dashboard'">Back to Dashboard</button>
+  </div>
+
+  <div class="container">
+    <h2>Edit Course Details</h2>
+    <form id="editCourseForm">
+      <label for="title">Course Title</label>
+      <input type="text" id="title" placeholder="Enter course title" required>
+
+      <label for="description">Description</label>
+      <textarea id="description" placeholder="Enter course description" required></textarea>
+
+      <label for="youtubeVideoId">YouTube Video ID</label>
+      <input type="text" id="youtubeVideoId" placeholder="e.g. dQw4w9WgXcQ">
+      <p class="hint">Leave empty if using a playlist instead.</p>
+
+      <label for="youtubePlaylistId">YouTube Playlist ID</label>
+      <input type="text" id="youtubePlaylistId" placeholder="e.g. PL123abcXYZ">
+      <p class="hint">Leave empty if using a single video.</p>
+
+      <label for="videoCount">Number of Videos</label>
+      <input type="number" id="videoCount" min="1" value="1">
+
+      <label for="imageUrl">Course Image URL</label>
+      <input type="url" id="imageUrl" placeholder="Enter image URL" required>
+
+      <label for="category">Category</label>
+      <select id="category" required>
+        <option value="">-- Select category --</option>
+        <option value="Web Development">Web Development</option>
+        <option value="Programming">Programming</option>
+        <option value="AI & ML">AI & ML</option>
+        <option value="Data Analytics">Data Analytics</option>
+        <option value="Other">Other</option>
+      </select>
+
+      <button type="submit" class="submit-btn">Update Course</button>
+      <p class="success" id="successMsg"></p>
+    </form>
+  </div>
+
+<script>
+// page url is /admin/courses/<id>/edit (MongoDB ids are 24-character hex strings)
+const courseId = window.location.pathname.split('/').filter(Boolean)[2];
+
+if (!/^[0-9a-fA-F]{24}$/.test(courseId || '')) {
+  alert("Invalid course id");
+  window.location.href = "/admin/dashboard";
+}
+
+// form elements
+const titleInput = document.getElementById('title');
+const descriptionInput = document.getElementById('description');
+const youtubeVideoIdInput = document.getElementById('youtubeVideoId');
+const youtubePlaylistIdInput = document.getElementById('youtubePlaylistId');
+const videoCountInput = document.getElementById('videoCount');
+const imageUrlInput = document.getElementById('imageUrl');
+const categoryInput = document.getElementById('category');
+const successMsg = document.getElementById('successMsg');
+
+// Fetch all courses and find the one to edit
+fetch("/api/admin/courses")
+  .then(res => res.json())
+  .then(resp => {
+    if (resp.status === 'success' && resp.data) {
+      const course = resp.data.find(c => c.course_id == courseId);
+      if (!course) {
+        alert('Course not found!');
+        window.location.href = '/admin/dashboard';
+        return;
+      }
+
+      // Fill form fields
+      titleInput.value = course.title ?? '';
+      descriptionInput.value = course.description ?? '';
+      youtubeVideoIdInput.value = course.youtube_video_id ?? '';
+      youtubePlaylistIdInput.value = course.youtube_playlist_id ?? '';
+      videoCountInput.value = course.video_count ?? 1;
+      imageUrlInput.value = course.image_url ?? '';
+      categoryInput.value = course.category ?? '';
+    } else {
+      alert(resp.message || 'Course not found!');
+      window.location.href = '/admin/dashboard';
+    }
+  })
+  .catch(err => {
+    console.error('Fetch course error', err);
+    alert('Could not load course. Check console/network.');
+    window.location.href = '/admin/dashboard';
+  });
+
+// Handle form submit
+const editForm = document.getElementById('editCourseForm');
+editForm.addEventListener('submit', function(e) {
+  e.preventDefault();
+
+  const payload = {
+    course_id: courseId,
+    title: titleInput.value.trim(),
+    description: descriptionInput.value.trim(),
+    youtube_video_id: youtubeVideoIdInput.value.trim(),
+    youtube_playlist_id: youtubePlaylistIdInput.value.trim(),
+    video_count: parseInt(videoCountInput.value, 10) || 1,
+    image_url: imageUrlInput.value.trim(),
+    category: categoryInput.value
+  };
+
+  // ✅ Validate fields
+  if (!payload.title || !payload.description || !payload.image_url || !payload.category) {
+    alert('Please fill all required fields');
+    return;
+  }
+
+  // ✅ Ensure at least one YouTube ID is given
+  if (!payload.youtube_video_id && !payload.youtube_playlist_id) {
+    alert('Please provide either a YouTube Video ID or a Playlist ID.');
+    return;
+  }
+
+  fetch(`/api/admin/courses/${courseId}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.status === 'success') {
+      successMsg.textContent = data.message || 'Course updated successfully!';
+      setTimeout(() => window.location.href = '/admin/dashboard', 1200);
+    } else {
+      alert(data.message || 'Error updating course');
+    }
+  })
+  .catch(err => {
+    console.error('Update error', err);
+    alert('Request failed. Check console/network.');
+  });
+});
+</script>
+</body>
+</html>

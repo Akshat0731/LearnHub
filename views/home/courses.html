@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Courses | LearnHub</title>
+  <style>
+    /* ======== BASE ======== */
+    body {
+      margin: 0;
+      font-family: "Poppins", sans-serif;
+      background: linear-gradient(120deg, #fff5ee, #fff);
+      color: #333;
+      overflow-x: hidden;
+    }
+
+    /* ======== HERO SECTION ======== */
+    .hero {
+      background: linear-gradient(100deg, #ff8c00, #ff6600);
+      color: white;
+      text-align: center;
+      padding: 90px 10% 100px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      bottom: -40px;
+      left: 0;
+      width: 100%;
+      height: 120px;
+      background: url('https://svgshare.com/i/13rC.svg') no-repeat center;
+      background-size: cover;
+      opacity: 0.4;
+    }
+
+    .hero h2 {
+      font-size: 2.8rem;
+      margin-bottom: 15px;
+      letter-spacing: 1px;
+    }
+
+    .hero p {
+      font-size: 1.1rem;
+      opacity: 0.9;
+      margin-bottom: 20px;
+    }
+
+    /* ======== COURSES SECTION ======== */
+    .courses {
+      padding: 70px 10%;
+      text-align: center;
+      position: relative;
+    }
+
+    .courses h3 {
+      font-size: 2.2rem;
+      color: #ff6600;
+      margin-bottom: 45px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      position: relative;
+      display: inline-block;
+    }
+
+    .courses h3::after {
+      content: "";
+      width: 80px;
+      height: 4px;
+      background: linear-gradient(90deg, #ff8c00, #ff6600);
+      position: absolute;
+      bottom: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-radius: 2px;
+    }
+
+    .course-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+      gap: 35px;
+      margin-top: 40px;
+    }
+
+    /* ======== COURSE CARD ======== */
+    .course-card {
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 16px;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 8px 20px rgba(255, 102, 0, 0.15);
+      overflow: hidden;
+      transition: all 0.4s ease;
+      transform: translateY(0);
+      border: 1px solid rgba(255, 102, 0, 0.1);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .course-card:hover {
+      transform: translateY(-10px) scale(1.02);
+      box-shadow: 0 12px 30px rgba(255, 102, 0, 0.3);
+    }
+
+    .course-card img {
+      width: 100%;
+      height: 190px;
+      object-fit: cover;
+      transition: transform 0.4s ease;
+    }
+
+    .course-card:hover img {
+      transform: scale(1.07);
+    }
+
+    .course-info {
+      padding: 20px 22px 25px;
+      text-align: left;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .course-info h4 {
+      color: #ff6600;
+      margin-bottom: 10px;
+      font-size: 1.25rem;
+    }
+
+    .course-info p {
+      font-size: 0.95rem;
+      color: #555;
+      line-height: 1.6;
+      margin-bottom: 18px;
+      flex: 1;
+    }
+
+    .enroll-btn {
+      display: inline-block;
+      background: linear-gradient(90deg, #ff8c00, #ff6600);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      transition: all 0.3s;
+      box-shadow: 0 4px 8px rgba(255, 102, 0, 0.25);
+      text-align: center;
+    }
+
+    .enroll-btn:hover {
+      background: #ff751a;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(255, 102, 0, 0.35);
+    }
+
+    /* ======== RESPONSIVE ======== */
+    @media (max-width: 768px) {
+      .hero h2 {
+        font-size: 2rem;
+      }
+      .hero p {
+        font-size: 1rem;
+      }
+      .courses h3 {
+        font-size: 1.8rem;
+      }
+    }
+  </style>
+  <script src="/js/utils.js"></script>
+</head>
+<body>
+  <!-- Navbar -->
+<!-- Placeholder for navbar -->
+<div id="navbarContainer"></div>
+
+<script>
+console.log("🚀 Loading navbar...");
+fetch("/partials/navbar.html")
+  .then(res => res.text())
+  .then(html => {
+    document.getElementById("navbarContainer").innerHTML = html;
+    console.log("✅ Navbar HTML loaded");
+
+    // Now load navbar.js
+    const script = document.createElement("script");
+    script.src = "/js/navbar.js";
+    script.onload = () => {
+      console.log("✅ Navbar JS executed");
+      initNavbar(); // This ensures everything exists
+    };
+    document.body.appendChild(script);
+  })
+  .catch(err => console.error("❌ Navbar load failed:", err));
+</script>
+
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <h2>Explore Our Popular Courses</h2>
+    <p>Upgrade your skills with our expert-led online courses — Learn anytime, anywhere!</p>
+  </section>
+
+  <!-- Courses Section -->
+  <section class="courses">
+    <h3>Our Featured Courses</h3>
+    <div class="course-grid" id="courseGrid">
+      <!-- JS injected courses -->
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <div id="footer"></div>
+  <script>
+const courseGrid = document.getElementById("courseGrid");
+
+// Fetch courses from backend
+async function loadCourses() {
+  try {
+    const res = await fetch('/api/courses');
+    const data = await res.json();
+
+    if(data.status === 'success'){
+      renderCourses(data.courses);
+    } else {
+      courseGrid.innerHTML = "<p>No courses found. </p>";
+    }
+  } catch(err) {
+    console.error("Error fetching courses:", err);
+    courseGrid.innerHTML = "<p>Failed to load courses.</p>;";
+  }
+}
+
+function renderCourses(courses) {
+  courseGrid.innerHTML = '';
+  courses.forEach(course => {
+    const card = document.createElement("div");
+    card.className = "course-card";
+    card.innerHTML = `
+      <img src="${escapeHtml(course.image_url)}" alt="${escapeHtml(course.title)}">
+      <div class="course-info">
+        <h4>${escapeHtml(course.title)}</h4>
+        <p>${escapeHtml(course.description)}</p>
+        <a href="/courses/${course.course_id}" class="enroll-btn">View Details</a>
+      </div>
+    `;
+    courseGrid.appendChild(card);
+  });
+}
+
+// Load courses on page load
+loadCourses();
+</script>
+</body>
+</html>

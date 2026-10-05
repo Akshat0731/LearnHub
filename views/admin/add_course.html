@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add New Course | LearnHub</title>
+  <style>
+    body {
+      font-family: "Poppins", sans-serif;
+      background: linear-gradient(120deg, #fff5ee, #fff);
+      margin: 0;
+      color: #333;
+    }
+
+    /* Navbar */
+    .navbar {
+      background: linear-gradient(90deg, #ff8c00, #ff6600);
+      color: white;
+      padding: 15px 10%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .navbar h2 { 
+        margin: 0; 
+        color: #fff;
+    }
+    .navbar button {
+      background: white;
+      color: #ff6600;
+      padding: 8px 18px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .navbar button:hover { background: #ffe0b3; }
+
+    /* Form container */
+    .container {
+      max-width: 600px;
+      margin: 70px auto;
+      padding: 25px 30px;
+      background: rgba(255,255,255,0.9);
+      border-radius: 16px;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 8px 20px rgba(255, 102, 0, 0.15);
+    }
+
+    h2 {
+      text-align: center;
+      color: #ff6600;
+      margin-bottom: 30px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 500;
+      text-align: left;
+    }
+
+    input, textarea, select {
+      width: 95%;
+      padding: 12px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-family: "Poppins", sans-serif;
+    }
+
+    textarea { height: 120px; resize: none; }
+
+    button.submit-btn {
+      background: linear-gradient(90deg, #ff8c00, #ff6600);
+      color: white;
+      padding: 12px 25px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    button.submit-btn:hover {
+      background: #ff751a;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(255, 102, 0, 0.35);
+    }
+
+    .success {
+      color: green;
+      text-align: center;
+      margin-top: 15px;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <div class="navbar">
+    <h2>Add New Course</h2>
+    <button onclick="window.location.href='/admin/dashboard'">Back to Dashboard</button>
+  </div>
+
+  <div class="container">
+    <h2>New Course Details</h2>
+    <form id="courseForm">
+      <label for="title">Course Title</label>
+      <input type="text" id="title" placeholder="Enter course title" required>
+
+      <label for="description">Description</label>
+      <textarea id="description" placeholder="Enter course description" required></textarea>
+
+      <label for="videoId">YouTube Video ID (if single video)</label>
+      <input type="text" id="videoId" placeholder="e.g. dQw4w9WgXcQ">
+
+      <label for="playlistId">YouTube Playlist ID (if playlist)</label>
+      <input type="text" id="playlistId" placeholder="e.g. PLx0sYbCqOb8TBPRdmBHs5Iftvv9TPboYG">
+
+      <label for="videoCount">Number of Videos (default 1 for single video)</label>
+      <input type="number" id="videoCount" min="1" value="1">
+
+      <label for="imageUrl">Course Image URL</label>
+      <input type="url" id="imageUrl" placeholder="Enter image URL" required>
+
+      <label for="category">Category</label>
+      <select id="category" required>
+        <option value="">-- Select category --</option>
+        <option value="Web Development">Web Development</option>
+        <option value="Programming">Programming</option>
+        <option value="AI & ML">AI & ML</option>
+        <option value="Data Analytics">Data Analytics</option>
+        <option value="Other">Other</option>
+      </select>
+
+      <button type="submit" class="submit-btn">Add Course</button>
+      <p class="error" id="errorMsg" style="color:red; text-align:center; margin-top:10px;"></p>
+      <p class="success" id="successMsg"></p>
+    </form>
+  </div>
+
+<script>
+const courseForm = document.getElementById('courseForm');
+const successMsg = document.getElementById('successMsg');
+const errorMsg = document.getElementById('errorMsg');
+
+courseForm.addEventListener('submit', function(e) {
+  e.preventDefault();
+
+  successMsg.textContent = '';
+  errorMsg.textContent = '';
+
+  const title = document.getElementById('title').value.trim();
+  const description = document.getElementById('description').value.trim();
+  const youtube_video_id = document.getElementById('videoId').value.trim();
+  const youtube_playlist_id = document.getElementById('playlistId').value.trim();
+  const video_count = parseInt(document.getElementById('videoCount').value) || 1;
+  const image_url = document.getElementById('imageUrl').value.trim();
+  const category = document.getElementById('category').value;
+
+  if(!title || !description || !image_url || !category) {
+    errorMsg.textContent = "Please fill all required fields.";
+    return;
+  }
+if (!youtube_video_id && !youtube_playlist_id) {
+  errorMsg.textContent = "Please enter either a YouTube Video ID or a Playlist ID.";
+  return;
+}
+  // Prepare payload
+  const payload = {
+    title,
+    description,
+    youtube_video_id,
+    youtube_playlist_id,
+    video_count,
+    image_url,
+    category
+  };
+
+  fetch('/api/admin/courses', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  })
+  .then(res => res.json())
+  .then(data => {
+    if(data.status === 'success'){
+      successMsg.textContent = data.message;
+      courseForm.reset();
+      setTimeout(()=> {
+        window.location.href = '/admin/dashboard';
+      }, 1500);
+    } else {
+      errorMsg.textContent = data.message;
+    }
+  })
+  .catch(err => {
+    console.error(err);
+    errorMsg.textContent = 'Something went wrong. Try again.';
+  });
+});
+</script>
+
+</body>
+</html>

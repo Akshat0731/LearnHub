@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student Dashboard | LearnHub</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: "Poppins", sans-serif;
+      margin: 0;
+      background: #fff9f5;
+      color: #333;
+    }
+
+    /* ===== NAVBAR ===== */
+    .navbar {
+      background: linear-gradient(90deg, #ff8c00, #ff6600);
+      padding: 15px 10%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: white;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .navbar h2 { margin: 0; }
+    .navbar button {
+      padding: 8px 18px;
+      background: #fff;
+      color: #ff6600;
+      font-weight: 600;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .navbar button:hover {
+      background: #ff751a;
+      color: #fff;
+    }
+
+    .dashboard { padding: 40px 10%; }
+
+    /* ===== PROFILE CARD ===== */
+    .profile-card {
+      display: flex;
+      align-items: center;
+      background: rgba(255,255,255,0.9);
+      padding: 25px 30px;
+      border-radius: 16px;
+      box-shadow: 0 8px 20px rgba(255,102,0,0.15);
+      margin-bottom: 40px;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .profile-img {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid #ff6600;
+    }
+
+    .profile-info h3 { margin: 0 0 5px 0; color: #ff6600; }
+    .profile-info p { margin: 3px 0; font-weight: 500; }
+
+    .profile-stats {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .stat {
+      background: rgba(255,102,0,0.1);
+      padding: 12px 18px;
+      border-radius: 12px;
+      text-align: center;
+      min-width: 100px;
+    }
+    .stat h4 { margin: 0; color: #ff6600; }
+    .stat p { margin: 0; font-weight: 500; }
+
+    /* ===== ENROLLED COURSES ===== */
+    .courses-section h3 { color: #ff6600; margin-bottom: 20px; }
+    .course-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 25px;
+    }
+    .course-card {
+      background: rgba(255,255,255,0.9);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 8px 20px rgba(255,102,0,0.15);
+      transition: all 0.3s;
+      border: 1px solid rgba(255,102,0,0.1);
+    }
+    .course-card:hover {
+      transform: translateY(-5px) scale(1.02);
+      box-shadow: 0 12px 30px rgba(255,102,0,0.3);
+    }
+    .course-card h4 { color: #ff6600; margin-bottom: 8px; }
+    .course-card p { margin-bottom: 10px; font-size: 0.95rem; }
+    .progress-bar {
+      background: #ff8c00;
+      height: 10px;
+      border-radius: 6px;
+      margin-bottom: 10px;
+    }
+    .course-card button {
+      background: linear-gradient(90deg, #ff8c00, #ff6600);
+      color: white;
+      padding: 8px 15px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .course-card button:hover { background: #ff751a; }
+
+  </style>
+  <script src="/js/utils.js"></script>
+</head>
+<body>
+  <!-- Navbar -->
+  <div class="navbar">
+    <h2>LearnHub Student Dashboard</h2>
+    <div> 
+      <button id="allCoursesBtn">All Courses</button> 
+      <button id="logoutBtn">Logout</button>
+    </div>
+  </div>
+
+  <div class="dashboard">
+    <!-- Profile -->
+    <div class="profile-card">
+      <img src="/images/profile.jpg" alt="Profile Image" class="profile-img">
+      <div class="profile-info">
+        <h3 id="studentName">Loading...</h3>
+        <p id="studentEmail">Loading...</p>
+      </div>
+      <div class="profile-stats">
+        <div class="stat"><h4 id="coursesCount">0</h4><p>Enrolled</p></div>
+        <div class="stat"><h4 id="completedCount">0</h4><p>Completed</p></div>
+        <div class="stat"><h4 id="overallProgress">0%</h4><p>Progress</p></div>
+      </div>
+    </div>
+
+    <!-- Enrolled Courses -->
+    <div class="courses-section">
+      <h3>Your Courses</h3>
+      <div class="course-grid" id="enrolledCourses"></div>
+    </div>
+  </div>
+
+  <script>
+console.log("🟢 Dashboard script loaded!");
+
+async function loadDashboard() {
+  try {
+    // ✅ 1. Check session
+    const sessionRes = await fetch("/api/auth/session", { credentials: "include" });
+    const sessionData = await sessionRes.json();
+    console.log("✅ Session check:", sessionData);
+
+    if (!sessionData.logged_in) {
+      alert("Session expired. Please log in again.");
+      window.location.href = "/login";
+      return;
+    }
+
+    // ✅ Display student info
+    document.getElementById("studentName").textContent = sessionData.name;
+    document.getElementById("studentEmail").textContent = sessionData.email;
+
+    // ✅ 2. Fetch enrolled courses (using correct backend file)
+    const res = await fetch("/api/enrollments/me", { credentials: "include" });
+    const data = await res.json();
+    console.log("🎓 Enrolled courses:", data);
+
+    const container = document.getElementById("enrolledCourses");
+
+    if (data.status !== "success" || !data.courses || data.courses.length === 0) {
+      container.innerHTML = `
+        <p style="color:#666; text-align:center; font-weight:500;">
+          You haven’t enrolled in any courses yet.<br>
+          <a href="/courses" style="color:#ff6600; text-decoration:underline;">Browse Courses</a>
+        </p>`;
+      return;
+    }
+
+    // ✅ 3. Calculate stats
+    const courses = data.courses;
+    document.getElementById("coursesCount").textContent = courses.length;
+
+    let completed = courses.filter(c => c.progress >= 100).length;
+    document.getElementById("completedCount").textContent = completed;
+
+    let totalProgress = courses.reduce((sum, c) => sum + (c.progress || 0), 0);
+    const overall = courses.length ? Math.round(totalProgress / courses.length) : 0;
+    document.getElementById("overallProgress").textContent = overall + "%";
+
+    // ✅ 4. Render enrolled courses dynamically
+    container.innerHTML = "";
+    courses.forEach(c => {
+      const card = document.createElement("div");
+      card.classList.add("course-card");
+      card.innerHTML = `
+        <h4>${escapeHtml(c.title)}</h4>
+        <p>${escapeHtml(c.description)}</p>
+        <div class="progress-bar" style="width:${c.progress || 0}%"></div>
+        <p><strong>${c.progress || 0}% Completed</strong></p>
+        <button onclick="window.location.href='/courses/${c.course_id}'">
+          View Course
+        </button>
+      `;
+      container.appendChild(card);
+    });
+
+  } catch (err) {
+    console.error("❌ Dashboard load error:", err);
+    document.getElementById("enrolledCourses").innerHTML =
+     '<p style="color:red;">⚠ Unable to load dashboard data. Please try again later.</p>';
+  }
+}
+
+// ✅ Logout logic
+document.getElementById("logoutBtn").addEventListener("click", async () => {
+  const res = await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
+  const data = await res.json();
+  if (data.status === "success") {
+    window.location.href = "/login";
+  }
+});
+
+// ✅ Redirect to all courses
+document.getElementById("allCoursesBtn").addEventListener("click", () => {
+  window.location.href = "/courses";
+});
+
+// ✅ Initialize dashboard
+loadDashboard();
+</script>
+</body>
+</html>

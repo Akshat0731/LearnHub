@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Navbar | LearnHub</title>
+  <style>
+    body {
+      margin: 0;
+      background: linear-gradient(90deg, #6a11cb, #2575fc);
+      font-family: 'Poppins', sans-serif;
+    }
+
+    header {
+      background: white;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 15px 8%;
+      box-shadow: 0 3px 8px rgba(255, 102, 0, 0.15);
+    }
+
+    header h1 {
+      color: #ff6600;
+      font-weight: 700;
+      font-size: 1.8rem;
+      margin: 0;
+    }
+
+    nav {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    nav a {
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      padding: 8px 14px;
+      border-radius: 6px;
+    }
+
+    nav a:not(.btn) {
+      color: #333;
+    }
+
+    nav a:not(.btn):hover {
+      color: #ff6600;
+      transform: scale(1.05);
+    }
+
+    nav a.btn {
+      background: linear-gradient(90deg, #ff8c00, #ff6600);
+      color: white;
+      font-weight: 600;
+    }
+
+    nav a.btn:hover {
+      background: #ff751a;
+      transform: translateY(-2px);
+    }
+
+    /* User profile display */
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 600;
+      color: #ff6600;
+    }
+
+    .user-info img {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 2px solid #ff6600;
+    }
+
+    /* Hamburger icon for mobile */
+    .menu-icon {
+      display: none;
+      font-size: 1.8rem;
+      color: #ff6600;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    @media (max-width: 768px) {
+      .menu-icon {
+        display: block;
+      }
+
+      nav {
+        display: none;
+        position: absolute;
+        top: 70px;
+        right: 8%;
+        background: white;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+        border-radius: 8px;
+        flex-direction: column;
+        padding: 15px 25px;
+        animation: slideDown 0.3s ease forwards;
+      }
+
+      nav.show {
+        display: flex;
+      }
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+  <script src="/js/navbar.js"></script>
+</head>
+<body>
+  <header>
+    <h1>LearnHub</h1>
+    <div class="menu-icon" id="menuIcon">☰</div>
+    <nav id="navbar">
+      <a href="/">Home</a>
+      <a href="/#features">Features</a>
+      <a href="/courses">Courses</a>
+      <a href="/contact">Contact</a>
+
+      <!-- Default links -->
+      <div id="authLinks">
+        <a href="/login" class="btn">Login</a>
+        <a href="/register" class="btn">Register</a>
+      </div>
+
+      <!-- User section (hidden by default) -->
+      <div id="userSection" class="user-info" style="display: none;">
+        <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="User Icon">
+        <span id="userName"></span>
+        <a href="#" id="logoutBtn" style="margin-left:10px; color:#ff6600; text-decoration:underline;">Logout</a>
+      </div>
+    </nav>
+  </header>
+
+ 
+</body>
+</html>

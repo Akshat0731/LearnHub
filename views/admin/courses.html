@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>View Courses | LearnHub</title>
+<style>
+  body {
+    font-family: "Poppins", sans-serif;
+    background: linear-gradient(120deg, #fff5ee, #fff);
+    margin: 0;
+    color: #333;
+  }
+
+  .navbar {
+    background: linear-gradient(90deg, #ff8c00, #ff6600);
+    color: white;
+    padding: 15px 10%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .navbar h2 { margin: 0; color: #fff; }
+  .navbar button {
+    background: white;
+    color: #ff6600;
+    padding: 8px 18px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  .navbar button:hover { background: #ffe0b3; }
+
+  .container {
+    max-width: 1000px;
+    margin: 70px auto;
+    padding: 20px 30px;
+    background: rgba(255,255,255,0.9);
+    border-radius: 16px;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 8px 20px rgba(255,102,0,0.15);
+  }
+
+  h2 {
+    text-align: center;
+    color: #ff6600;
+    margin-bottom: 30px;
+  }
+
+  .course-card {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+    padding: 15px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(255,102,0,0.1);
+    align-items: center;
+  }
+
+  .course-card img {
+    width: 120px;
+    height: 80px;
+    border-radius: 8px;
+    object-fit: cover;
+  }
+
+  .course-info { flex: 1; }
+  .course-info h4 { margin: 0 0 6px 0; color: #ff6600; }
+  .course-info p { margin: 0; color: #555; font-size: 0.95rem; }
+
+  .actions button {
+    margin-left: 10px;
+    padding: 6px 14px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s;
+  }
+
+  .actions button.edit { background: #ffcc80; color: #333; }
+  .actions button.edit:hover { background: #ffb74d; }
+
+  .actions button.delete { background: #ff8a80; color: #fff; }
+  .actions button.delete:hover { background: #ff5252; }
+
+  .meta {
+    font-size: 0.9rem;
+    color: #666;
+    margin-top: 4px;
+  }
+</style>
+  <script src="/js/utils.js"></script>
+</head>
+<body>
+
+<div class="navbar">
+  <h2>All Courses</h2>
+  <button onclick="window.location.href='/admin/dashboard'">Back to Dashboard</button>
+</div>
+
+<div class="container" id="coursesContainer">
+  <h2>Manage Courses</h2>
+</div>
+
+<script>
+const coursesContainer = document.getElementById('coursesContainer');
+
+// Fetch all courses
+async function fetchCourses() {
+  try {
+    const res = await fetch('/api/admin/courses');
+    const data = await res.json();
+
+    if (data.status === 'success') {
+      renderCourses(data.data);
+    } else {
+      coursesContainer.innerHTML = `<p>${data.message}</p>`;
+    }
+  } catch (err) {
+    console.error('Error fetching courses:', err);
+    coursesContainer.innerHTML = '<p>Failed to load courses.</p>';
+  }
+}
+
+function renderCourses(courses) {
+  coursesContainer.innerHTML = '<h2>Manage Courses</h2>';
+
+  if (!courses || courses.length === 0) {
+    coursesContainer.innerHTML += '<p>No courses found. Please add courses.</p>';
+    return;
+  }
+
+  courses.forEach(course => {
+    const isPlaylist = course.youtube_playlist_id && course.youtube_playlist_id.trim() !== "";
+    const videoType = isPlaylist ? "Playlist" : "Single Video";
+    const videoCount = isPlaylist ? `${course.video_count} Videos` : "1 Video";
+
+    const card = document.createElement('div');
+    card.className = 'course-card';
+    card.innerHTML = `
+      <img src="${escapeHtml(course.image_url || 'https://via.placeholder.com/120x80')}" alt="${escapeHtml(course.title)}">
+      <div class="course-info">
+        <h4>${escapeHtml(course.title)}</h4>
+        <p>${escapeHtml((course.description || '').substring(0, 60))}...</p>
+        <p>Category: ${escapeHtml(course.category)}</p>
+        <p class="meta">Type: ${videoType} | ${videoCount}</p>
+      </div>
+      <div class="actions">
+        <button class="edit" onclick="editCourse('${course.course_id}')">Edit</button>
+        <button class="delete" onclick="deleteCourse('${course.course_id}')">Delete</button>
+      </div>
+    `;
+    coursesContainer.appendChild(card);
+  });
+}
+
+function editCourse(id) {
+  window.location.href = `/admin/courses/${id}/edit`;
+}
+
+// Delete course
+async function deleteCourse(id) {
+  if (!confirm('Are you sure you want to delete this course?')) return;
+
+  const res = await fetch(`/api/admin/courses/${id}`, { method: 'DELETE' });
+
+  const data = await res.json();
+  alert(data.message);
+  if (data.status === 'success') fetchCourses(); // refresh
+}
+
+// Initial fetch
+fetchCourses();
+</script>
+</body>
+</html>

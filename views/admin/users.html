@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>View Users | LearnHub</title>
+<style>
+  body {
+    font-family: "Poppins", sans-serif;
+    background: linear-gradient(120deg, #fff5ee, #fff);
+    margin: 0;
+    color: #333;
+  }
+  .navbar {
+    background: linear-gradient(90deg, #ff8c00, #ff6600);
+    color: white;
+    padding: 15px 10%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .navbar h2 { margin: 0; color: #fff; }
+  .navbar button {
+    background: white;
+    color: #ff6600;
+    padding: 8px 18px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  .navbar button:hover { background: #ffe0b3; }
+
+  .container {
+    max-width: 900px;
+    margin: 70px auto;
+    padding: 20px 30px;
+    background: rgba(255,255,255,0.9);
+    border-radius: 16px;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 8px 20px rgba(255,102,0,0.15);
+  }
+
+  h2 { text-align: center; color: #ff6600; margin-bottom: 30px; }
+
+  table { width: 100%; border-collapse: collapse; text-align: left; }
+  th, td { padding: 12px 10px; border-bottom: 1px solid #ccc; }
+  th { color: #ff6600; }
+  tr:hover { background: rgba(255,102,0,0.1); }
+
+  button.delete {
+    background: #ff8a80;
+    color: white;
+    padding: 6px 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  button.delete:hover { background: #ff5252; }
+</style>
+  <script src="/js/utils.js"></script>
+</head>
+<body>
+
+<div class="navbar">
+  <h2>All Users</h2>
+  <button onclick="window.location.href='/admin/dashboard'">Back to Dashboard</button>
+</div>
+
+<div class="container" id="usersContainer">
+  <h2>Registered Users</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Role</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="usersTableBody"></tbody>
+  </table>
+</div>
+
+<script>
+const usersTableBody = document.getElementById('usersTableBody');
+
+// Fetch users from backend
+async function fetchUsers() {
+    const res = await fetch('/api/admin/users');
+    const data = await res.json();
+
+    if(data.status === 'success') {
+        renderUsers(data.data);
+    } else {
+        usersTableBody.innerHTML = `<tr><td colspan="4">${data.message}</td></tr>`;
+    }
+}
+
+// Render users table
+function renderUsers(users) {
+    usersTableBody.innerHTML = '';
+    if(users.length === 0){
+        usersTableBody.innerHTML = '<tr><td colspan="4">No users found</td></tr>';
+        return;
+    }
+
+    users.forEach(user => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${escapeHtml(user.name)}</td>
+            <td>${escapeHtml(user.email)}</td>
+            <td>${escapeHtml(user.role)}</td>
+            <td>
+                <button class="delete" onclick="deleteUser('${user.user_id}')">Delete</button>
+            </td>
+        `;
+        usersTableBody.appendChild(tr);
+    });
+}
+
+// Delete user
+async function deleteUser(user_id){
+    if(!confirm('Are you sure you want to delete this user?')) return;
+
+    const res = await fetch(`/api/admin/users/${user_id}`, { method: 'DELETE' });
+
+    const data = await res.json();
+    alert(data.message);
+    if(data.status === 'success') fetchUsers();
+}
+
+// Initial fetch
+fetchUsers();
+</script>
+
+</body>
+</html>

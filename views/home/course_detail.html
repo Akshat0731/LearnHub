@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Course Details | LearnHub</title>
+  <style>
+    body {
+      font-family: "Poppins", sans-serif;
+      background: linear-gradient(120deg, #fff5ee, #fff);
+      margin: 0;
+      color: #333;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 80px auto 50px;
+      padding: 0 20px;
+    }
+
+    h2 {
+      color: #ff6600;
+      font-size: 2rem;
+      margin-bottom: 15px;
+    }
+
+    p {
+      font-size: 1rem;
+      line-height: 1.6;
+      margin-bottom: 20px;
+      color: white;
+    }
+
+    iframe {
+      width: 100%;
+      height: 400px;
+      border-radius: 12px;
+      border: none;
+      margin-bottom: 20px;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 12px 25px;
+      margin-right: 15px;
+      margin-top: 10px;
+      background: linear-gradient(90deg, #ff8c00, #ff6600);
+      color: #fff;
+      text-decoration: none;
+      border-radius: 8px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      background: #ff751a;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(255, 102, 0, 0.35);
+    }
+
+    .download-link {
+      display: block;
+      margin-top: 20px;
+      color: #ff6600;
+      font-weight: 500;
+      text-decoration: underline;
+    }
+
+    .feedback-section {
+      margin-top: 50px;
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 16px;
+      padding: 25px 30px;
+      box-shadow: 0 8px 20px rgba(255, 102, 0, 0.15);
+    }
+
+    .feedback-section h3 {
+      color: #ff6600;
+      margin-bottom: 20px;
+    }
+
+    .feedback-card {
+      border-bottom: 1px solid #ddd;
+      padding: 12px 0;
+    }
+
+    .feedback-card:last-child {
+      border-bottom: none;
+    }
+
+    .feedback-card strong {
+      color: #ff6600;
+    }
+
+    .feedback-card small {
+      color: #666;
+      font-size: 0.85rem;
+    }
+  </style>
+  <script src="/js/utils.js"></script>
+</head>
+
+<body>
+  <!-- Navbar -->
+  <div id="navbarContainer"></div>
+  <script>
+    console.log("🚀 Loading navbar...");
+    fetch("/partials/navbar.html")
+      .then(res => res.text())
+      .then(html => {
+        document.getElementById("navbarContainer").innerHTML = html;
+        console.log("✅ Navbar HTML loaded");
+
+        const script = document.createElement("script");
+        script.src = "/js/navbar.js";
+        script.onload = () => {
+          console.log("✅ Navbar JS executed");
+          initNavbar();
+        };
+        document.body.appendChild(script);
+      })
+      .catch(err => console.error("❌ Navbar load failed:", err));
+  </script>
+
+  <div class="container" id="courseContainer"></div>
+
+  <!-- Footer -->
+  <div id="footer"></div>
+<script>
+  fetch("/partials/footer.html")
+    .then(res => res.text())
+    .then(data => document.getElementById("footer").innerHTML = data);
+
+  const container = document.getElementById('courseContainer');
+  // page url is /courses/<id>
+  const courseId = window.location.pathname.split('/').filter(Boolean)[1];
+
+  async function loadCourse() {
+    try {
+      const res = await fetch(`/api/courses/${courseId}`);
+      const data = await res.json();
+
+      if (data.status === 'success') {
+        const course = data.course;
+
+        // ✅ Determine YouTube Embed Type
+        let embedUrl = '';
+        if (course.youtube_playlist_id && course.youtube_playlist_id.trim() !== '') {
+          embedUrl = `https://www.youtube.com/embed/videoseries?list=${encodeURIComponent(course.youtube_playlist_id)}`;
+        } else if (course.youtube_video_id && course.youtube_video_id.trim() !== '') {
+          embedUrl = `https://www.youtube.com/embed/${encodeURIComponent(course.youtube_video_id)}`;
+        }
+
+        container.innerHTML = `
+          <h2>${escapeHtml(course.title)}</h2>
+          <img src="${escapeHtml(course.image_url)}" alt="${escapeHtml(course.title)}" style="width:100%;max-height:400px;object-fit:cover;border-radius:12px;margin-bottom:20px;">
+          <p>${escapeHtml(course.description)}</p>
+          <p><strong>Total Videos:</strong> ${course.video_count}</p>
+          ${
+            embedUrl
+              ? `<iframe src="${embedUrl}" allowfullscreen></iframe>`
+              : "<p>No video content available.</p>"
+              
+          }
+          ${course.notes_url ? `<a href="${course.notes_url}" class="download-link" download>Download Notes</a> `:"" }
+          <button class="btn" id="enrollBtn">Enroll Now</button>
+          <a href="/courses/${course.course_id}/feedback" class="btn">Feedback</a>
+
+          <div class="feedback-section" id="feedbackSection">
+            <h3>What Students Say</h3>
+            <div id="feedbackList">Loading feedback...</div>
+          </div>
+        `;
+
+        // ✅ Enroll button
+        document.getElementById('enrollBtn').addEventListener('click', async () => {
+          const formData = new FormData();
+          formData.append('course_id', course.course_id);
+          const res = await fetch('/api/enrollments', {
+            method: 'POST',
+            body: formData
+          });
+          const result = await res.json();
+          alert(result.message);
+        });
+
+        // ✅ Load feedback
+        loadFeedback(course.course_id);
+      } else {
+        container.innerHTML = `<p>${data.message}</p>`;
+      }
+    } catch (err) {
+      console.error(err);
+      container.innerHTML = "<p>Failed to load course details.</p>";
+    }
+  }
+
+  async function loadFeedback(courseId) {
+    try {
+      const res = await fetch(`/api/feedback?course_id=${courseId}`);
+      const data = await res.json();
+
+      const feedbackList = document.getElementById('feedbackList');
+      feedbackList.innerHTML = '';
+
+      if (data.status === 'success' && data.feedbacks.length > 0) {
+        data.feedbacks.forEach(fb => {
+          const div = document.createElement('div');
+          div.classList.add('feedback-card');
+          div.innerHTML = `
+            <strong>${escapeHtml(fb.user_name)}</strong> 
+            <small>(${fb.rating} ★)</small>
+            <h5>${escapeHtml(fb.comment)}</h5>
+            <small>Posted on ${fb.submitted_at}</small>
+          `;
+          feedbackList.appendChild(div);
+        });
+      } else {
+        feedbackList.innerHTML = '<span>No feedback available yet.</span>';
+      }
+    } catch (err) {
+      console.error('Error loading feedback:', err);
+      document.getElementById('feedbackList').innerHTML = '<p>Failed to load feedback.</p>';
+    }
+  }
+
+  loadCourse();
+</script>
+</body>
+</html>

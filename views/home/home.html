@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LearnHub - Online Learning Platform</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Poppins", sans-serif;
+    }
+
+    body {
+      background: #fffaf5;
+      color: #333;
+    }
+
+    /* Hero Section */
+    .hero {
+      background: linear-gradient(135deg, #fffaf5 60%, #ffecd2);
+      padding: 80px 10%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+
+    .hero-text {
+      flex: 1;
+      min-width: 300px;
+    }
+
+    .hero-text h2 {
+      font-size: 2.8rem;
+      color: #333;
+      margin-bottom: 15px;
+    }
+
+    .hero-text span {
+      color: #ff6600;
+    }
+
+    .hero-text p {
+      color: #555;
+      line-height: 1.6;
+      margin-bottom: 25px;
+    }
+
+    .hero-text button {
+      background: linear-gradient(90deg, #ff8c42, #ff6600);
+      border: none;
+      color: white;
+      padding: 12px 30px;
+      border-radius: 30px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.3s;
+      box-shadow: 0 5px 15px rgba(255, 102, 0, 0.3);
+    }
+
+    .hero-text button:hover {
+      background: #ff6600;
+      transform: translateY(-3px);
+    }
+
+    .hero img {
+      flex: 1;
+      min-width: 300px;
+      max-width: 450px;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    /* Features Section */
+    .features {
+      text-align: center;
+      padding: 80px 8%;
+      background: white;
+    }
+
+    .features h2 {
+      color: #333;
+      font-size: 2rem;
+      margin-bottom: 40px;
+    }
+
+    .feature-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 25px;
+    }
+
+    .feature {
+      background: #fff5ed;
+      border-radius: 15px;
+      padding: 30px;
+      box-shadow: 0 4px 10px rgba(255, 102, 0, 0.1);
+      transition: transform 0.3s;
+    }
+
+    .feature:hover {
+      transform: translateY(-8px);
+    }
+
+    .feature img {
+      width: 70px;
+      margin-bottom: 15px;
+    }
+
+    .feature h3 {
+      color: #ff6600;
+      margin-bottom: 10px;
+    }
+
+    /* Courses Section */
+    .courses {
+      background: linear-gradient(180deg, #ffffff 0%, #fff4e8 100%);
+      padding: 80px 8%;
+      text-align: center;
+    }
+
+    .courses h2 {
+      font-size: 2rem;
+      color: #333;
+      margin-bottom: 40px;
+    }
+
+    .course-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 25px;
+    }
+
+    .course {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 5px 15px rgba(255, 102, 0, 0.15);
+      overflow: hidden;
+      transition: 0.3s;
+    }
+
+    .course:hover {
+      transform: translateY(-8px);
+    }
+
+    .course img {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+    }
+
+    .course-info {
+      padding: 20px;
+    }
+
+    .course-info h3 {
+      color: #ff6600;
+      margin-bottom: 10px;
+    }
+
+    .course-info p {
+      color: #555;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    /* Footer */
+    footer {
+      background: #1a1a1a;
+      color: #ddd;
+      padding: 60px 8% 20px;
+    }
+
+    .footer-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 30px;
+      margin-bottom: 30px;
+    }
+
+    .footer-col h3 {
+      color: #ff6600;
+      margin-bottom: 15px;
+    }
+
+    .footer-col p, .footer-col a {
+      color: #ccc;
+      text-decoration: none;
+      line-height: 1.6;
+      font-size: 0.95rem;
+      display: block;
+    }
+
+    .footer-col a:hover {
+      color: #ff6600;
+    }
+
+    .footer-bottom {
+      text-align: center;
+      font-size: 0.9rem;
+      border-top: 1px solid #333;
+      padding-top: 15px;
+      color: #999;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+<div id="navbarContainer"></div>
+
+<script>
+console.log("🚀 Loading navbar...");
+fetch("/partials/navbar.html")
+  .then(res => res.text())
+  .then(html => {
+    document.getElementById("navbarContainer").innerHTML = html;
+    console.log("✅ Navbar HTML loaded");
+
+    // Now load navbar.js
+    const script = document.createElement("script");
+    script.src = "/js/navbar.js";
+    script.onload = () => {
+      console.log("✅ Navbar JS executed");
+      initNavbar(); // This ensures everything exists
+    };
+    document.body.appendChild(script);
+  })
+  .catch(err => console.error("❌ Navbar load failed:", err));
+</script>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-text">
+      <h2>Learn From <span>Experts</span> Anytime, Anywhere!</h2>
+      <p>Join LearnHub and unlock thousands of interactive online courses designed to empower your career and enhance your skills.</p>
+      <button onclick="window.location.href='/login'">Get Started</button>
+    </div>
+    <img src="/images/OnlineLearning.png" alt="Online Learning">
+  </section>
+
+  <!-- Features Section -->
+  <section class="features" id="features">
+    <h2>Why Choose LearnHub?</h2>
+    <div class="feature-container">
+      <div class="feature">
+        <img src="https://cdn-icons-png.flaticon.com/512/1048/1048953.png" alt="Expert Tutors">
+        <h3>Expert Tutors</h3>
+        <p>Learn from industry professionals who bring real-world experience to every class.</p>
+      </div>
+      <div class="feature">
+        <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Flexible Learning">
+        <h3>Flexible Learning</h3>
+        <p>Access your courses anytime, from any device — your learning, your way.</p>
+      </div>
+      <div class="feature">
+        <img src="https://cdn-icons-png.flaticon.com/512/2920/2920344.png" alt="Certificates">
+        <h3>Certificates</h3>
+        <p>Earn certificates for completed courses to showcase your skills and achievements.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Courses Section -->
+  <section class="courses" id="courses">
+    <h2>Popular Courses</h2>
+    <div class="course-container">
+      <div class="course">
+        <img src="/images/full-stack-web-development.jpg" alt="Web Dev">
+        <div class="course-info">
+          <h3>Full Stack Web Development</h3>
+          <p>Master HTML, CSS, JS, and backend frameworks to become a complete developer.</p>
+        </div>
+      </div>
+      <div class="course">
+        <img src="/images/data-science.jpg" alt="Data Science">
+        <div class="course-info">
+          <h3>Data Science & AI</h3>
+          <p>Analyze data, train ML models, and use AI to solve real-world challenges.</p>
+        </div>
+      </div>
+      <div class="course">
+        <img src="/images/graphic-designing.jpeg" alt="Graphic Design">
+        <div class="course-info">
+          <h3>Graphic Design Masterclass</h3>
+          <p>Design stunning visuals and user interfaces with Figma and Adobe tools.</p>
+        </div>
+      </div>
+      <div class="course">
+        <img src="/images/cyber-security.jpeg" alt="Cyber Security">
+        <div class="course-info">
+          <h3>Cyber Security Basics</h3>
+          <p>Learn how to protect networks, devices, and data from cyber threats.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer id="footer">
+    <div class="footer-container">
+      <div class="footer-col">
+        <h3>About LearnHub</h3>
+        <p>LearnHub is your gateway to world-class learning experiences. We bring expert instructors, modern tools, and engaging content to help you succeed.</p>
+      </div>
+      <div class="footer-col">
+        <h3>Quick Links</h3>
+        <a href="#">Home</a>
+        <a href="#features">Features</a>
+        <a href="#courses">Courses</a>
+        <a href="/login">Login</a>
+        <a href="/register">Register</a>
+      </div>
+      <div class="footer-col">
+        <h3>Contact Us</h3>
+        <p>Email: <a>support@learnHub.com</a></p>
+        <p>Phone: +91 98765 43210</p>
+        <p>Address: Surat, India</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      © 2025 LearnHub | Designed with ❤️ by Team LearnHub
+    </div>
+  </footer>
+</body>
+</html>

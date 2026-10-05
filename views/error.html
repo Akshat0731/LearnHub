@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LearnHub - Error {{status}}</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Poppins", sans-serif;
+    }
+
+    body {
+      background: #fffaf5;
+      color: #333;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .box {
+      background: white;
+      padding: 50px 40px;
+      border-radius: 14px;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+      max-width: 460px;
+      width: 100%;
+    }
+
+    .box h1 {
+      font-size: 4rem;
+      color: #ff6600;
+      margin-bottom: 10px;
+    }
+
+    .box p {
+      color: #555;
+      line-height: 1.6;
+      margin-bottom: 25px;
+    }
+
+    .box a {
+      display: inline-block;
+      background: linear-gradient(90deg, #ff8c42, #ff6600);
+      color: white;
+      text-decoration: none;
+      padding: 12px 30px;
+      border-radius: 30px;
+      font-weight: 600;
+      transition: 0.3s;
+    }
+
+    .box a:hover {
+      transform: translateY(-2px);
+    }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h1>{{status}}</h1>
+    <p>{{message}}</p>
+    <a href="/">Back to Home</a>
+  </div>
+</body>
+</html>

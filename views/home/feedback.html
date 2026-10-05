@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Course Feedback | LearnHub</title>
+  <style>
+    body {
+      font-family: "Poppins", sans-serif;
+      background: linear-gradient(120deg, #fff5ee, #fff);
+      margin: 0;
+      color: #333;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 80px auto;
+      padding: 30px;
+      background: rgba(255,255,255,0.9);
+      border-radius: 16px;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 8px 20px rgba(255, 102, 0, 0.15);
+    }
+
+    h2 {
+      text-align: center;
+      color: #ff6600;
+      margin-bottom: 30px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+
+    textarea, input[type="number"] {
+      width: 96%;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin-bottom: 20px;
+      font-family: "Poppins", sans-serif;
+    }
+
+    input[type="number"] {
+      -moz-appearance: textfield;
+    }
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    button {
+      display: inline-block;
+      padding: 12px 25px; 
+      background: linear-gradient(90deg, #ff8c00, #ff6600);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    button:hover {
+      background: #ff751a;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(255, 102, 0, 0.35);
+    }
+
+    .success {
+      color: green;
+      margin-top: 15px;
+      text-align: center;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <div id="navbarContainer"></div>
+
+<script>
+console.log("🚀 Loading navbar...");
+fetch("/partials/navbar.html")
+  .then(res => res.text())
+  .then(html => {
+    document.getElementById("navbarContainer").innerHTML = html;
+    console.log("✅ Navbar HTML loaded");
+
+    // Now load navbar.js
+    const script = document.createElement("script");
+    script.src = "/js/navbar.js";
+    script.onload = () => {
+      console.log("✅ Navbar JS executed");
+      initNavbar(); // This ensures everything exists
+    };
+    document.body.appendChild(script);
+  })
+  .catch(err => console.error("❌ Navbar load failed:", err));
+</script>
+
+
+  <div class="container">
+    <h2>Submit Your Feedback</h2>
+    <form id="feedbackForm">
+      <label for="rating">Rating (1 to 5)</label>
+      <input type="number" id="rating" min="1" max="5" required>
+
+      <label for="feedbackText">Feedback</label>
+      <textarea id="feedbackText" rows="5" placeholder="Write your feedback..." required></textarea>
+
+      <button type="submit">Submit Feedback</button>
+      <p class="success" id="successMsg"></p>
+    </form>
+  </div>
+
+  <!-- Footer -->
+  <div id="footer"></div>
+  <script>
+    fetch("/partials/footer.html")
+      .then(res => res.text())
+      .then(data => document.getElementById("footer").innerHTML = data);
+
+    const feedbackForm = document.getElementById('feedbackForm');
+    const successMsg = document.getElementById('successMsg');
+
+    // ✅ Extract course_id from URL
+    // page url is /courses/<id>/feedback
+    const courseId = window.location.pathname.split('/').filter(Boolean)[1];
+
+    if (!courseId) {
+      alert("No course ID found. Redirecting...");
+      window.location.href = "/courses";
+    }
+
+    // ✅ Submit feedback dynamically to backend
+    feedbackForm.addEventListener('submit', async function(e){
+      e.preventDefault();
+
+      const rating = parseInt(document.getElementById('rating').value);
+      const text = document.getElementById('feedbackText').value.trim();
+
+      if(!rating || !text) return;
+
+      try {
+        const res = await fetch('/api/feedback', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ course_id: courseId, rating, feedback: text })
+        });
+        const data = await res.json();
+        console.log("✅ Feedback Response:", data);
+
+        if(data.status === 'success') {
+          successMsg.textContent = "Thank you! Your feedback has been submitted.";
+          feedbackForm.reset();
+
+          setTimeout(() => {
+            window.location.href = `/courses/${courseId}`;
+          }, 1500);
+        } else {
+          successMsg.textContent = "❌ " + data.message;
+        }
+      } catch (err) {
+        console.error("❌ Feedback submit error:", err);
+        successMsg.textContent = "Something went wrong. Try again.";
+      }
+    });
+  </script>
+</body>
+</html>
