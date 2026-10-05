@@ -154,6 +154,3 @@ LearnHub uses **session-based authentication**.
 * View dashboard statistics
 
 Admin pages are served through **guarded routes**, so they cannot be opened by regular users or visitors.
-
-throw new
-```
